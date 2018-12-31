@@ -1,7 +1,7 @@
 import display from "./display.js"
-import Castle from "./castle.js"
+import Castle from "./castle/castle.js"
 
-const maxAttempts = 1000
+const maxAttempts = 500
 
 export default class Board {
   constructor(options) {
@@ -14,12 +14,27 @@ export default class Board {
 
     this.generateCastles()
     this.generatePaths()
+
+    display.createLayers(3)
+    for (const castle of this.castles) {
+      castle.init()
+    }
   }
 
-  draw() {
-    for (const castle of this.castles) castle.drawPaths()
-    for (const castle of this.castles) castle.drawButtons()
-    for (const castle of this.castles) castle.drawCastle()
+  update() {
+    for (let castle of this.castles) {
+      for (let path of castle.paths) {
+        for (let deployment of path.deployments) {
+          deployment.update()
+        }
+      }
+    }
+  }
+
+  tick() {
+    for (let castle of this.castles) {
+      if (castle.owner != null) castle.tick()
+    }
   }
 
   generateCastles() {
@@ -52,12 +67,14 @@ export default class Board {
       let count = 0
       
       for (let closest of closestCastles) {
-        if (closest.distance < this.spread * 2 && castle.paths.length < this.maxPaths && closest.castle.paths.length < this.maxPaths) {
-          castle.addPath(closest.castle)
-          closest.castle.addPath(castle)
+        if (closest.distance < this.spread * 2 && castle.adjacentCastles.length < this.maxPaths && closest.castle.adjacentCastles.length < this.maxPaths) {
+          if (castle.adjacentCastles.indexOf(closest.castle) == -1 && closest.castle.adjacentCastles.indexOf(castle) == -1) {
+            castle.adjacentCastles.push(closest.castle)
+            closest.castle.adjacentCastles.push(castle)
 
-          if (count > this.pathAdditionLimit) break
-          count++
+            if (count > this.pathAdditionLimit) break
+            count++
+          }
         }
       }
     }
