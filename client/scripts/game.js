@@ -1,5 +1,5 @@
-import Board from "./board";
-import Player from "./player";
+import Board from "./board.js"
+import Player from "./player.js"
 
 export default class Game {
   constructor() {
@@ -11,8 +11,16 @@ export default class Game {
       maxCastlePaths: 4
     })
   }
+
+  tick() {
+    this.board.tick()
+  }
+
+  update() {
+    this.board.update()
+  }
 }
 
 function randomInt(min, max) {
-  Math.floor(Math.random() * (max - min + 1)) + min
+  return Math.floor(Math.random() * (max - min + 1)) + min
 }

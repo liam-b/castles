@@ -1,9 +1,19 @@
-import display from "./display.js"
-import Castle from "./castle/castle.js"
+const Castle = require('./castle/castle.js')
+
+Math.distance = (x1, y1, x2, y2) => {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+}
+
+Math.within = (lower, value, upper) => {
+  return value > lower && value < upper
+}
+
+const WIDTH = 1440
+const HEIGHT = 800
 
 const maxAttempts = 500
 
-export default class Board {
+module.exports = class Board {
   constructor(options) {
     this.count = options.castleCount
     this.spread = options.castleSpread
@@ -15,7 +25,6 @@ export default class Board {
     this.generateCastles()
     this.generatePaths()
 
-    display.createLayers(3)
     for (const castle of this.castles) {
       castle.init()
     }
@@ -46,13 +55,13 @@ export default class Board {
         if (attempts > maxAttempts) break
         attempts++
 
-        x = Math.random() * display.width
-        y = Math.random() * display.height
+        x = Math.random() * WIDTH
+        y = Math.random() * HEIGHT
         let closestCastle = this.surroundingCastles(x, y)[0]
         
         validated = 
-          Math.within(display.width * 0.1, x, display.width * 0.9) &&
-          Math.within(display.height * 0.1, y, display.height * 0.9) &&
+          Math.within(WIDTH * 0.1, x, WIDTH * 0.9) &&
+          Math.within(HEIGHT * 0.1, y, HEIGHT * 0.9) &&
           (closestCastle == undefined || closestCastle.distance > this.spread)
       }
 
@@ -97,5 +106,51 @@ export default class Board {
       if (b.distance > a.distance) return -1
       return 0
     })
+  }
+
+  serialise() {
+    let castles = []
+    for (const castle of this.castles) {
+      let paths = []
+      for (const path of castle.paths) {
+        let deployments = []
+        for (const deployment of path.deployments) {
+          deployments.push({
+            path: castle.paths.indexOf(deployment.path),
+            troops: deployment.troops,
+            step: deployment.step
+          })
+        }
+
+        paths.push({
+          destination: this.castles.indexOf(path.destination),
+          angle: path.angle,
+
+          deployments: deployments
+        })
+      }
+
+      castles.push({
+        x: castle.x,
+        y: castle.y,
+        // owner: castle.owner.id,
+
+        troops: castle.troops,
+        capacity: castle.capacity,
+
+        paths: paths
+      })
+    }
+
+    let data = {
+      castleCount: this.count,
+      castleSpread: this.spread,
+      pathAdditionLimit: this.additionLimit,
+      maxCastlePaths: this.maxPaths,
+
+      castles: castles
+    }
+
+    return data
   }
 }

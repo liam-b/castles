@@ -1,34 +1,27 @@
-import display from "../display.js"
-import Path from "./path.js"
-import Button from "./button.js"
-import Deployment from "./deployment.js"
+const Path = require('./path.js')
+const Button = require('./button.js')
+const Deployment = require('./deployment.js')
 
 const CASTLE_SCALE = 1
 const BUTTON_LENGTH = 30
-const DEPLOY_LIMIT = 6
+const DEPLOY_LIMIT = 4
 
-export default class Castle {
+module.exports = class Castle {
   constructor(x, y) {
     this.x = x
     this.y = y
     this.adjacentCastles = []
 
-    this.shape = null
-    this.backgroundShape = null
     this.paths = []
     this.buttons = []
 
     this.owner = null
 
     this.troops = 0
-    this.capacity = 24
+    this.capacity = 25
   }
 
   init() {
-    display.switchLayer(1)
-    this.backgroundShape = display.circle(this.x, this.y, 10, display.HSB(0, 0, 0.65))
-    display.switchLayer(2)
-    this.shape = display.circle(this.x, this.y, 2, display.HSB(0, 0, 0.5))
     this.updateTroops(5, this.owner)
 
     for (const castle of this.adjacentCastles) {
@@ -50,12 +43,9 @@ export default class Castle {
       this.troops = Math.max(0, this.troops - troops)
     }
 
-    this.shape.scale((this.troops * CASTLE_SCALE + 2) / (this.shape.bounds.width / 2))
     for (let button of this.buttons) {
       button.x = button.path.castle.x + Math.sin(button.path.angle) * (this.troops * CASTLE_SCALE + BUTTON_LENGTH / 2)
       button.y = button.path.castle.y + Math.cos(button.path.angle) * (this.troops * CASTLE_SCALE + BUTTON_LENGTH / 2)
-
-      button.shape.position = new paper.Point(button.x, button.y)
     }
 
     if (this.troops == 0 && owner != null) this.setOwner(owner)
@@ -72,10 +62,6 @@ export default class Castle {
 
   setOwner(player) {
     this.owner = player
-    display.switchLayer(1)
-    this.backgroundShape.set({ fillColor: display.HSB(this.owner.hue, 0.5, 0.98) })
-    display.switchLayer(2)
-    this.shape.set({ fillColor: display.HSB(this.owner.hue, 0.9, 0.98) })
 
     for (let path of this.paths) {
       path.setHue(this.owner.hue)

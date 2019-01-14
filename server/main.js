@@ -1,21 +1,28 @@
 const socketIO = require('socket.io')
 const Player = require('./player.js')
+const Board = require('./board.js')
 
 module.exports = class GameServer {
   constructor(http) {
     this.io = socketIO(http)
-    this.players = []
-
     this.io.on('connection', (socket) => {
-      this.players.push(new Player(socket.id))
-      console.log('player with id', socket.id, 'connected')
-    
-      socket.on('disconnect', () => {
-        console.log('player with id', socket.id, 'disconnected')
-        for (let player of this.players) {
-          if (player.id == socket.id) this.players.splice(this.players.indexOf(player))
-        }
-      })
+      socket.emit('acknowledge-connection', this.board.serialise())
     })
+
+    this.players = []
+    this.board = new Board({
+      castleCount: 25,
+      castleSpread: 150,
+      pathAdditionLimit: 2,
+      maxCastlePaths: 4
+    })
+  }
+
+  tick() {
+    this.board.tick()
+  }
+
+  update() {
+    this.board.update()
   }
 }
