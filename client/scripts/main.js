@@ -12,7 +12,7 @@ Math.within = (lower, value, upper) => {
 }
 
 display.createLayers(3)
-var socket = io('http://localhost:8080/')
+var socket = io()
 window.game = new Game(socket)
 
 setInterval(() => { game.tick() }, 1000)
