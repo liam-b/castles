@@ -1,4 +1,6 @@
 const Castle = require('./castle/castle.js')
+const Deployment = require('./castle/deployment.js')
+const Player = require('./player.js')
 
 Math.distance = (x1, y1, x2, y2) => {
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
@@ -20,6 +22,7 @@ module.exports = class Board {
     this.additionLimit = options.pathAdditionLimit
     this.maxPaths = options.maxCastlePaths
 
+    this.players = []
     this.castles = []
 
     this.generateCastles()
@@ -76,10 +79,10 @@ module.exports = class Board {
       let count = 0
       
       for (let closest of closestCastles) {
-        if (closest.distance < this.spread * 2 && castle.adjacentCastles.length < this.maxPaths && closest.castle.adjacentCastles.length < this.maxPaths) {
-          if (castle.adjacentCastles.indexOf(closest.castle) == -1 && closest.castle.adjacentCastles.indexOf(castle) == -1) {
-            castle.adjacentCastles.push(closest.castle)
-            closest.castle.adjacentCastles.push(castle)
+        if (closest.distance < this.spread * 2 && castle.connectedCastles.length < this.maxPaths && closest.castle.connectedCastles.length < this.maxPaths) {
+          if (castle.connectedCastles.indexOf(closest.castle) == -1 && closest.castle.connectedCastles.indexOf(castle) == -1) {
+            castle.connectedCastles.push(closest.castle)
+            closest.castle.connectedCastles.push(castle)
 
             if (count > this.pathAdditionLimit) break
             count++
@@ -109,6 +112,14 @@ module.exports = class Board {
   }
 
   serialise() {
+    let players = []
+    for (const player of this.players) {
+      players.push({
+        id: player.id,
+        hue: player.hue
+      })
+    }
+
     let castles = []
     for (const castle of this.castles) {
       let paths = []
@@ -130,10 +141,20 @@ module.exports = class Board {
         })
       }
 
+      let owner = null
+      if (castle.owner) {
+        for (const player of players) {
+          if (player.id == castle.owner.id) {
+            owner = player
+            break
+          }
+        }
+      }
+
       castles.push({
         x: castle.x,
         y: castle.y,
-        // owner: castle.owner.id,
+        owner: owner,
 
         troops: castle.troops,
         capacity: castle.capacity,
@@ -148,9 +169,52 @@ module.exports = class Board {
       pathAdditionLimit: this.additionLimit,
       maxCastlePaths: this.maxPaths,
 
+      players: players,
       castles: castles
     }
 
     return data
+  }
+
+  deserialise(data) {
+    this.castles = []
+    this.players = []
+
+    for (const castle of data.castles) {
+      this.castles.push(new Castle(castle.x, castle.y))
+    }
+
+    for (let castle of this.castles) {
+      let pathIndexes = []
+      for (const path of data.castles[this.castles.indexOf(castle)].paths) {
+        pathIndexes.push(path.destination)
+      }
+
+      for (const pathIndex of pathIndexes) {
+        castle.connectedCastles.push(this.castles[pathIndex])
+      }
+    }
+
+    for (const castle of this.castles) {
+      castle.init()
+      castle.setOwner(data.castles[this.castles.indexOf(castle)].owner)
+    }
+
+    for (const castle of this.castles) {
+      for (const path of castle.paths) {
+        for (const deployment of data.castles[this.castles.indexOf(castle)].paths[castle.paths.indexOf(path)].deployments) {
+          let dep = new Deployment(castle, path, deployment.troops)
+          dep.step = deployment.step
+          path.deployments.push(dep)
+
+          console.log('deserialised deployment')
+          
+        }
+      }
+    }
+
+    for (const player of data.players) {
+      this.players.push(new Player(player.id, player.hue, false))
+    }
   }
 }

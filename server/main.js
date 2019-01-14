@@ -1,12 +1,22 @@
 const socketIO = require('socket.io')
-const Player = require('./player.js')
 const Board = require('./board.js')
 
 module.exports = class GameServer {
   constructor(http) {
     this.io = socketIO(http)
+
     this.io.on('connection', (socket) => {
-      socket.emit('acknowledge-connection', this.board.serialise())
+      console.log('connected new player', socket.id)
+      
+      socket.emit('update', {
+        board: this.board.serialise()
+      })
+      socket.emit('init')
+
+      socket.on('update', (data) => {
+        this.board.deserialise(data.board)
+        socket.broadcast.emit('update', data)
+      })
     })
 
     this.players = []
@@ -24,5 +34,19 @@ module.exports = class GameServer {
 
   update() {
     this.board.update()
+  }
+
+  reset() {
+    this.board = new Board({
+      castleCount: 25,
+      castleSpread: 150,
+      pathAdditionLimit: 2,
+      maxCastlePaths: 4
+    })
+
+    this.io.emit('update', {
+      board: this.board.serialise()
+    })
+    this.io.emit('init')
   }
 }

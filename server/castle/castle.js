@@ -10,7 +10,7 @@ module.exports = class Castle {
   constructor(x, y) {
     this.x = x
     this.y = y
-    this.adjacentCastles = []
+    this.connectedCastles = []
 
     this.paths = []
     this.buttons = []
@@ -24,7 +24,7 @@ module.exports = class Castle {
   init() {
     this.updateTroops(5, this.owner)
 
-    for (const castle of this.adjacentCastles) {
+    for (const castle of this.connectedCastles) {
       let path = new Path(this, castle)
       let button = new Button(this, path)
       this.paths.push(path)
@@ -62,13 +62,5 @@ module.exports = class Castle {
 
   setOwner(player) {
     this.owner = player
-
-    for (let path of this.paths) {
-      path.setHue(this.owner.hue)
-    }
-
-    for (let button of this.buttons) {
-      button.setHue(this.owner.hue)
-    }
   }
 }

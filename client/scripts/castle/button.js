@@ -1,4 +1,5 @@
 import display from "../display.js"
+import Game from "../game.js";
 
 const BUTTON_LENGTH = 30
 const BUTTON_CLICK_SCALE = 1.25
@@ -30,12 +31,14 @@ export default class Button {
     if (this.castle.owner != null) {
       this.shape.scale(BUTTON_CLICK_SCALE)
       this.castle.deployTroops(this.path)
+      game.sendUpdate()
     }
   }
 
   mouseUp(event) {
     if (this.castle.owner != null) {
       this.shape.scale(1 / BUTTON_CLICK_SCALE)
+      game.sendUpdate()
     }
   }
 }

@@ -7,7 +7,6 @@ export default class Deployment {
   constructor(castle, path, troops) {
     this.castle = castle
     this.path = path
-    this.owner = castle.owner
     this.troops = troops
     this.step = 0
 
@@ -16,7 +15,7 @@ export default class Deployment {
 
     display.switchLayer(1)
     let drawSize = this.troops * DEPLOYMENT_SCALE + 2
-    this.shape = display.circle(this.x, this.y, drawSize, display.HSB(this.owner.hue, 0.82, 0.98))
+    this.shape = display.circle(this.x, this.y, drawSize, display.HSB(this.castle.owner.hue, 0.82, 0.98))
     this.shape.locked = true
   }
 
@@ -38,7 +37,7 @@ export default class Deployment {
   }
 
   hitCastle(castle) {
-    castle.updateTroops(this.troops, this.owner)
+    castle.updateTroops(this.troops, this.castle.owner)
     this.remove()
   }
 

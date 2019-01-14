@@ -16,4 +16,9 @@ http.listen(port, function () {
   console.log('listen', `listening on port ${port}`)
 })
 
-let game = new GameServer(http)
+var game = new GameServer(http)
+setInterval(() => { game.tick() }, 1000)
+setInterval(() => { game.update() }, 17)
+
+setInterval(() => { game.reset() }, 30000)
+

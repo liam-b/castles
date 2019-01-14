@@ -11,7 +11,7 @@ export default class Castle {
   constructor(x, y) {
     this.x = x
     this.y = y
-    this.adjacentCastles = []
+    this.connectedCastles = []
 
     this.shape = null
     this.backgroundShape = null
@@ -31,7 +31,7 @@ export default class Castle {
     this.shape = display.circle(this.x, this.y, 2, display.HSB(0, 0, 0.5))
     this.updateTroops(5, this.owner)
 
-    for (const castle of this.adjacentCastles) {
+    for (const castle of this.connectedCastles) {
       let path = new Path(this, castle)
       let button = new Button(this, path)
       this.paths.push(path)
@@ -71,18 +71,20 @@ export default class Castle {
   }
 
   setOwner(player) {
-    this.owner = player
-    display.switchLayer(1)
-    this.backgroundShape.set({ fillColor: display.HSB(this.owner.hue, 0.5, 0.98) })
-    display.switchLayer(2)
-    this.shape.set({ fillColor: display.HSB(this.owner.hue, 0.9, 0.98) })
-
-    for (let path of this.paths) {
-      path.setHue(this.owner.hue)
-    }
-
-    for (let button of this.buttons) {
-      button.setHue(this.owner.hue)
+    if (player != null) {
+      this.owner = player
+      display.switchLayer(1)
+      this.backgroundShape.set({ fillColor: display.HSB(this.owner.hue, 0.5, 0.98) })
+      display.switchLayer(2)
+      this.shape.set({ fillColor: display.HSB(this.owner.hue, 0.9, 0.98) })
+  
+      for (let path of this.paths) {
+        path.setHue(this.owner.hue)
+      }
+  
+      for (let button of this.buttons) {
+        button.setHue(this.owner.hue)
+      }
     }
   }
 }

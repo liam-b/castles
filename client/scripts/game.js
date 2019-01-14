@@ -2,22 +2,49 @@ import Board from "./board.js"
 import Player from "./player.js"
 
 export default class Game {
-  constructor() {
-    this.player = new Player(randomInt(0, 360))
-    this.board = new Board({
-      castleCount: 25,
-      castleSpread: 150,
-      pathAdditionLimit: 2,
-      maxCastlePaths: 4
+  constructor(socket) {
+    this.socket = socket
+
+    this.player = new Player(0, randomInt(0, 360))
+    this.board = new Board()
+
+    this.socket.on('update', (data) => {  
+      this.receivedUpdate(data)
+    })
+
+    this.socket.on('init', () => {
+      this.board.players.push(this.player)
+
+      for (const castle of this.board.castles) {
+        if (castle.owner == null) {
+          castle.setOwner(this.player)
+          break
+        }
+      }
+
+      this.sendUpdate()
+    })
+  }
+
+  receivedUpdate(data) {
+    this.player.id = this.socket.id
+    if (this.board) this.board.destroy()
+    this.board.deserialise(data.board, this.player)
+    console.log(this.board.players)
+  }
+
+  sendUpdate() {
+    this.socket.emit('update', {
+      board: this.board.serialise()
     })
   }
 
   tick() {
-    this.board.tick()
+    if (this.board) this.board.tick()
   }
 
   update() {
-    this.board.update()
+    if (this.board) this.board.update()
   }
 }
 
