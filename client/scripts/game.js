@@ -5,7 +5,7 @@ export default class Game {
   constructor(socket) {
     this.socket = socket
 
-    this.player = new Player(0, randomInt(0, 360))
+    this.player = new Player(0, randomInt(0, 360), false)
     this.board = new Board()
 
     this.socket.on('update', (data) => {  
@@ -24,13 +24,16 @@ export default class Game {
 
       this.sendUpdate()
     })
+
+    this.socket.on('disconnect', () => {
+      socket.socket.reconnect()
+    })
   }
 
   receivedUpdate(data) {
     this.player.id = this.socket.id
     if (this.board) this.board.destroy()
     this.board.deserialise(data.board, this.player)
-    console.log(this.board.players)
   }
 
   sendUpdate() {

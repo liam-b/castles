@@ -45,12 +45,7 @@ module.exports = class GameServer {
     })
 
     for (let sock of Object.keys(this.io.sockets.sockets)) {
-      let socket = this.io.sockets.sockets[sock]
-
-      socket.emit('update', {
-        board: this.board.serialise()
-      })
-      socket.emit('init')
+      this.io.sockets.sockets[sock].disconnect(true)
     }
   }
 }

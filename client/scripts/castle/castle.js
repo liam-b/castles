@@ -44,7 +44,7 @@ export default class Castle {
   }
 
   updateTroops(troops, owner) {
-    if (owner == this.owner) {
+    if ((!owner && !this.owner) || (owner && this.owner && owner.id == this.owner.id)) {
       this.troops = Math.min(this.troops + troops, this.capacity)
     } else {
       this.troops = Math.max(0, this.troops - troops)
