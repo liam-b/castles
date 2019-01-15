@@ -206,9 +206,6 @@ module.exports = class Board {
           let dep = new Deployment(castle, path, deployment.troops)
           dep.step = deployment.step
           path.deployments.push(dep)
-
-          console.log('deserialised deployment')
-          
         }
       }
     }
