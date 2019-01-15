@@ -114,6 +114,8 @@ export default class Board {
     for (const castle of this.castles) {
       castle.init()
       castle.setOwner(data.castles[this.castles.indexOf(castle)].owner)
+      castle.troops = data.castles[this.castles.indexOf(castle)].troops
+      castle.updateTroops(0, castle.owner)
     }
 
     for (const castle of this.castles) {

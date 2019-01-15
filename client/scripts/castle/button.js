@@ -28,8 +28,6 @@ export default class Button {
   }
 
   mouseDown(event) {
-    // console.log(!!this.castle.owner.id, this.castle.owner.id, '==', !!game.player.id, game.player.id);
-    
     if (this.castle.owner && game.player && this.castle.owner.id == game.player.id) {
       this.shape.scale(BUTTON_CLICK_SCALE)
       this.castle.deployTroops(this.path)
@@ -38,7 +36,7 @@ export default class Button {
   }
 
   mouseUp(event) {
-    if (this.castle.owner && game.owner && this.castle.owner.id == game.player.id) {
+    if (this.castle.owner && game.player && this.castle.owner.id == game.player.id) {
       this.shape.scale(1 / BUTTON_CLICK_SCALE)
     }
   }
