@@ -15,9 +15,22 @@ display.createLayers(3)
 var socket = io()
 window.game = new Game(socket)
 
-setInterval(() => { game.tick() }, 1000)
-paper.view.onFrame = () => { game.update() }
+// setInterval(() => { game.tick() }, 1000)
+// setInterval(() => { game.update() }, 17)
+// paper.view.onFrame = () => { game.update() }
 
 // window.onbeforeunload = function () {
 //   return "Do you really want to close?";
 // };
+
+function tick() {
+  game.tick()
+  setTimeout(tick, 1000)
+}
+tick()
+
+function update() {
+  game.update()
+  setTimeout(update, 17)
+}
+update()
