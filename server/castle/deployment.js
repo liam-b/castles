@@ -23,7 +23,7 @@ module.exports = class Deployment {
     for (let path of this.path.destination.paths) {
       if (path.destination == this.castle) {
         for (let deployment of path.deployments) {
-          if (Math.distance(this.x, this.y, deployment.x, deployment.y) < 1) this.hitDeployment(deployment)
+          if (deployment.castle.owner != this.castle.owner && Math.distance(this.x, this.y, deployment.x, deployment.y) < 1) this.hitDeployment(deployment)
         }
       }
     }
