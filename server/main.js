@@ -43,10 +43,12 @@ module.exports = class GameServer {
       pathAdditionLimit: 2,
       maxCastlePaths: 4
     })
-
-    this.io.emit('update', {
-      board: this.board.serialise()
+    
+    io.sockets.clients().forEach((socket) => {
+      socket.emit('update', {
+        board: this.board.serialise()
+      })
+      socket.emit('init')
     })
-    this.io.emit('init')
   }
 }

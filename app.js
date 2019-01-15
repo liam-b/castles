@@ -20,5 +20,5 @@ var game = new GameServer(http)
 setInterval(() => { game.tick() }, 1000)
 setInterval(() => { game.update() }, 17)
 
-setInterval(() => { game.reset() }, 30000)
+setInterval(() => { game.reset() }, 60000)
 
