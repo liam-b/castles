@@ -26,7 +26,7 @@ export default class Game {
     })
 
     this.socket.on('disconnect', () => {
-      this.socket.socket.connect()
+      this.socket.connect()
     })
   }
 
