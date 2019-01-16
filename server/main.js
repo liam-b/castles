@@ -6,27 +6,28 @@ module.exports = class GameServer {
   constructor(http) {
     this.io = socketIO(http)
     this.clients = []
-    this.reset()
 
     // this.io.emit('GameInitaliseEvent')
 
-    setTimeout(() => {
+    setInterval(() => {
       console.log('emit', 'GameInitaliseEvent')
       
       this.io.emit('GameInitaliseEvent')
-    }, 6000)
 
-    setTimeout(() => {
-      console.log('emit', 'GameStartEvent')
+      setTimeout(() => {
+        console.log('emit', 'GameStartEvent')
+  
+        this.reset()
+        for (let client of this.clients) {
+          let player = new Player(client.id, client.hue)
+          this.board.players.push(player)
+          this.board.castles[this.board.players.length - 1].owner = player
+        }
+  
+        this.io.emit('GameStartEvent', this.board.serialise())
+      }, 5000)
 
-      for (let client of this.clients) {
-        let player = new Player(client.id, client.hue)
-        this.board.players.push(player)
-        this.board.castles[this.board.players.length - 1].owner = player
-      }
-      
-      this.io.emit('GameStartEvent', this.board.serialise())
-    }, 8000)
+    }, 20000)
 
     // this.io.emit('GameStartEvent', this.board.serialise())
 
