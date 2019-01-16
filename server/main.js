@@ -69,11 +69,11 @@ module.exports = class GameServer {
   }
 
   tick() {
-    this.board.tick()
+    if (this.board) this.board.tick()
   }
 
   update() {
-    this.board.update()
+    if (this.board) this.board.update()
   }
 
   reset() {
