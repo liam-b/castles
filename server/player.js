@@ -3,4 +3,11 @@ module.exports = class Player {
     this.id = id
     this.hue = hue
   }
+
+  serialise() {
+    return {
+      id: this.id,
+      hue: this.hue
+    }
+  }
 }

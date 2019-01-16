@@ -11,6 +11,8 @@ export default class Castle {
   constructor(x, y) {
     this.x = x
     this.y = y
+
+    this.index
     this.connectedCastles = []
 
     this.shape = null
@@ -31,9 +33,10 @@ export default class Castle {
     this.shape = display.circle(this.x, this.y, 2, display.HSB(0, 0, 0.5))
     this.updateTroops(5, this.owner)
 
-    for (const castle of this.connectedCastles) {
-      let path = new Path(this, castle)
+    for (let i = 0; i < this.connectedCastles.length; i++) {
+      let path = new Path(this, this.connectedCastles[i])
       let button = new Button(this, path)
+      path.index = i
       this.paths.push(path)
       this.buttons.push(button)
     }
@@ -86,5 +89,26 @@ export default class Castle {
         button.setHue(this.owner.hue)
       }
     }
+  }
+
+  deserialise(castle, castles, players) {
+    this.index = castle.index
+    this.connectedCastles = []
+    for (let path of castle.paths) {      
+      this.connectedCastles.push(castles[path.destination])
+    }
+
+    let owner = null
+    for (let player of players) {
+      if (player.id == castle.owner) {
+        owner = player
+        break
+      }
+    }
+
+    this.init()
+    this.setOwner(owner)
+    this.troops = castle.troops
+    this.updateTroops(0, this.owner)
   }
 }

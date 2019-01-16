@@ -5,6 +5,7 @@ export default class Path {
     this.castle = castle
     this.destination = destination
     this.deployments = []
+    this.index
 
     display.switchLayer(0)
     this.shape = display.line(castle.x, castle.y, (destination.x + castle.x) / 2, (destination.y + castle.y) / 2, "#eaeaeaaa", 20)

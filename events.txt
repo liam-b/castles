@@ -1,0 +1,15 @@
+[server -> all] () GameInitaliseEvent
+
+[server -> client] (client) PlayerJoinRequest
+[client -> server] (status) PlayerJoinAcknowledge
+
+[server -> all] (board) GameStartEvent
+
+[client -> server] (event) PlayerEvent
+[server -> others] (event) PlayerEvent
+
+[server -> all] (castles) SyncEvent
+
+[server -> all] () GameEndEvent
+
+[client -> server] (client) ClientLeaveEvent

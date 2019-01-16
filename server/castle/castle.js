@@ -10,6 +10,8 @@ module.exports = class Castle {
   constructor(x, y) {
     this.x = x
     this.y = y
+
+    this.index
     this.connectedCastles = []
 
     this.paths = []
@@ -24,8 +26,10 @@ module.exports = class Castle {
   init() {
     this.updateTroops(5, this.owner)
 
-    for (const castle of this.connectedCastles) {
-      let path = new Path(this, castle)
+    for (let i = 0; i < this.connectedCastles.length; i++) {
+      let path = new Path(this, this.connectedCastles[i])
+      path.index = i
+
       let button = new Button(this, path)
       this.paths.push(path)
       this.buttons.push(button)
@@ -48,7 +52,7 @@ module.exports = class Castle {
       button.y = button.path.castle.y + Math.cos(button.path.angle) * (this.troops * CASTLE_SCALE + BUTTON_LENGTH / 2)
     }
 
-    if (this.troops == 0 && owner != null) this.setOwner(owner)
+    if (this.troops == 0 && owner != null) this.owner = owner
   }
 
   deployTroops(path) {
@@ -60,7 +64,19 @@ module.exports = class Castle {
     }
   }
 
-  setOwner(player) {
-    this.owner = player
+  serialise() {
+    let paths = []
+    for (let path of this.paths) {
+      paths.push(path.serialise())
+    }
+
+    return {
+      x: this.x,
+      y: this.y,
+      index: this.index,
+      owner: this.owner ? this.owner.id : null,
+      troops: this.troops,
+      paths: paths
+    }
   }
 }

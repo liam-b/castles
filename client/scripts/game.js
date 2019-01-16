@@ -1,45 +1,52 @@
-import Board from "./board.js"
-import Player from "./player.js"
+import Board from './board.js'
+import Player from './player.js'
 
 export default class Game {
-  constructor(socket) {
-    this.socket = socket
-
-    this.player = new Player(0, randomInt(0, 360), false)
+  constructor() {
+    this.socket = io()
     this.board = new Board()
+    this.client = new Player(Math.uuid(), Math.randomInt(0, 360), false)
+    this.participating = false
 
-    this.socket.on('update', (data) => {  
-      this.receivedUpdate(data)
+    this.socket.on('GameInitaliseEvent', () => {
+      console.log('on', 'GameInitaliseEvent')
+
+      console.log('emit', 'PlayerJoinRequest')
+      
+      this.socket.emit('PlayerJoinRequest', game.client.serialise())
     })
+    
+    this.socket.on('PlayerJoinAcknowledge', status => {
+      console.log('on', 'PlayerJoinAcknowledge')
 
-    this.socket.on('init', () => {
-      this.board.players.push(this.player)
-
-      for (const castle of this.board.castles) {
-        if (castle.owner == null) {
-          castle.setOwner(this.player)
-          break
-        }
-      }
-
-      this.sendUpdate()
+      this.participating = status.accepted
     })
+    
+    this.socket.on('GameStartEvent', board => {
+      console.log('on', 'GameStartEvent')
 
-    this.socket.on('disconnect', () => {
-      this.socket.connect()
+      this.board.deserialise(board, this.client)
     })
+    
+    this.socket.on('PlayerEvent', event => {
+      console.log('on', 'PlayerEvent')
+
+      this.board.deserialiseEvent(event)
+    })
+    
+    this.socket.on('SyncEvent', sync => {
+      this.board.deserialiseSync(sync)
+    })
+    
+    // this.socket.on('disconnect', () => {
+    //   this.socket.connect()
+    // })
   }
 
-  receivedUpdate(data) {
-    this.player.id = this.socket.id
-    if (this.board) this.board.destroy()
-    this.board.deserialise(data.board, this.player)
-  }
+  sendEvent(event) {
+    console.log('emit', 'PlayerEvent')
 
-  sendUpdate() {
-    this.socket.emit('update', {
-      board: this.board.serialise()
-    })
+    if (this.participating) this.socket.emit('PlayerEvent', event)
   }
 
   tick() {
@@ -51,6 +58,8 @@ export default class Game {
   }
 }
 
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
+// function gameLoop() {
+//   window.requestAnimationFrame(gameLoop);
+
+//   currentTime = (new Date()).getTime();
+//   delta = (currentTime - lastTime) / 1000;

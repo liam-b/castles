@@ -25,111 +25,35 @@ export default class Board {
     }
   }
 
-  serialise() {
-    let players = []
-    for (const player of this.players) {
-      players.push({
-        id: player.id,
-        hue: player.hue
-      })
-    }
+  deserialise(board, client) {
+    this.destroy()
 
-    let castles = []
-    for (const castle of this.castles) {
-      let paths = []
-      for (const path of castle.paths) {
-        let deployments = []
-        for (const deployment of path.deployments) {
-          deployments.push({
-            path: castle.paths.indexOf(deployment.path),
-            troops: deployment.troops,
-            step: deployment.step
-          })
-        }
-
-        paths.push({
-          destination: this.castles.indexOf(path.destination),
-          angle: path.angle,
-
-          deployments: deployments
-        })
-      }
-
-      let owner = null
-      if (castle.owner) {
-        for (const player of players) {
-          if (player.id == castle.owner.id) {
-            owner = player
-            break
-          }
-        }
-      }
-
-      castles.push({
-        x: castle.x,
-        y: castle.y,
-        owner: owner,
-
-        troops: castle.troops,
-        capacity: castle.capacity,
-
-        paths: paths
-      })
-    }
-
-    
-
-    let data = {
-      castleCount: this.count,
-      castleSpread: this.spread,
-      pathAdditionLimit: this.additionLimit,
-      maxCastlePaths: this.maxPaths,
-
-      players: players,
-      castles: castles
-    }
-
-    return data
-  }
-
-  deserialise(data, play) {
-    this.castles = []
     this.players = []
+    for (let player of board.players) {
+      this.players.push(new Player().deserialise(player, client))
+    }
 
-    for (const castle of data.castles) {
+    this.castles = []
+    for (let castle of board.castles) {
       this.castles.push(new Castle(castle.x, castle.y))
     }
 
-    for (let castle of this.castles) {
-      let pathIndexes = []
-      for (const path of data.castles[this.castles.indexOf(castle)].paths) {
-        pathIndexes.push(path.destination)
-      }
-
-      for (const pathIndex of pathIndexes) {
-        castle.connectedCastles.push(this.castles[pathIndex])
-      }
+    for (let i = 0; i < this.castles.length; i++) {
+      this.castles[i].deserialise(board.castles[i], this.castles, this.players)
     }
+  }
 
-    for (const castle of this.castles) {
-      castle.init()
-      castle.setOwner(data.castles[this.castles.indexOf(castle)].owner)
-      castle.troops = data.castles[this.castles.indexOf(castle)].troops
-      castle.updateTroops(0, castle.owner)
+  deserialiseSync(sync) {
+    for (let castle in sync.castles) {
+      this.castles[castle.index].deserialise(castle, this.castles, this.players)
     }
+  }
 
-    for (const castle of this.castles) {
-      for (const path of castle.paths) {
-        for (const deployment of data.castles[this.castles.indexOf(castle)].paths[castle.paths.indexOf(path)].deployments) {
-          let dep = new Deployment(castle, path, deployment.troops)
-          dep.step = deployment.step
-          path.deployments.push(dep)
-        }
-      }
-    }
-
-    for (const player of data.players) {
-      this.players.push(new Player(player.id, player.hue, player.id != play.id))
+  deserialiseEvent(event) {
+    switch (event.type) {
+      case 'DeploymentEvent':
+        this.castles[event.data.castle].deployTroops(this.castles[event.data.castle].paths[event.data.path])
+        break
     }
   }
 
@@ -154,3 +78,42 @@ export default class Board {
     }
   }
 }
+
+// this.castles = []
+// this.players = []
+
+// for (const castle of board.castles) {
+//   this.castles.push(new Castle(castle.x, castle.y))
+// }
+
+// for (let castle of this.castles) {
+//   let pathIndexes = []
+//   for (const path of board.castles[this.castles.indexOf(castle)].paths) {
+//     pathIndexes.push(path.destination)
+//   }
+
+//   for (const pathIndex of pathIndexes) {
+//     castle.connectedCastles.push(this.castles[pathIndex])
+//   }
+// }
+
+// for (const castle of this.castles) {
+//   castle.init()
+//   castle.setOwner(board.castles[this.castles.indexOf(castle)].owner)
+//   castle.troops = board.castles[this.castles.indexOf(castle)].troops
+//   castle.updateTroops(0, castle.owner)
+// }
+
+// for (const castle of this.castles) {
+//   for (const path of castle.paths) {
+//     for (const deployment of board.castles[this.castles.indexOf(castle)].paths[castle.paths.indexOf(path)].deployments) {
+//       let dep = new Deployment(castle, path, deployment.troops)
+//       dep.step = deployment.step
+//       path.deployments.push(dep)
+//     }
+//   }
+// }
+
+// for (const player of board.players) {
+//   this.players.push(new Player(player.id, player.hue, player.id != client.id))
+// }
