@@ -13,8 +13,8 @@ module.exports = class Deployment {
     this.y = this.castle.y
   }
 
-  update() {
-    this.step += STEP_SIZE
+  update(delta) {
+    this.step += STEP_SIZE * delta
     this.x = this.castle.x + Math.sin(this.path.angle) * this.step
     this.y = this.castle.y + Math.cos(this.path.angle) * this.step
 

@@ -111,4 +111,18 @@ export default class Castle {
     this.troops = castle.troops
     this.updateTroops(0, this.owner)
   }
+
+  deserialiseSync(castle, players) {
+    let owner = null
+    for (let player of players) {
+      if (player.id == castle.owner) {
+        owner = player
+        break
+      }
+    }
+
+    this.setOwner(owner)
+    this.troops = castle.troops
+    this.updateTroops(0, this.owner)
+  }
 }

@@ -5,9 +5,6 @@ module.exports = class Path {
     this.index
     this.deployments = []
     this.angle = Math.atan2(castle.x - destination.x, castle.y - destination.y) + Math.PI
-    
-    console.log(this.castle.index, this.destination.index)
-    
   }
 
   serialise() {

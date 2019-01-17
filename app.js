@@ -18,7 +18,20 @@ http.listen(port, function () {
 
 var game = new GameServer(http)
 setInterval(() => { game.tick() }, 1000)
-setInterval(() => { game.update() }, 17)
 
-setInterval(() => { game.reset() }, 300000)
+// setInterval(() => { game.reset() }, 300000)
 
+let lastTime = microtime()
+function gameLoop() {
+  let currentTime = microtime()
+  let delta = (currentTime - lastTime) / 1000000 * 60
+  lastTime = currentTime
+  
+  game.update(delta)
+}
+setInterval(gameLoop, 17)
+
+function microtime() {
+  let hrTime = process.hrtime()
+  return hrTime[0] * 1000000.0 + hrTime[1] / 1000.0
+}

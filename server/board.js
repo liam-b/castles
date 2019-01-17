@@ -33,11 +33,11 @@ module.exports = class Board {
     }
   }
 
-  update() {
+  update(delta) {
     for (let castle of this.castles) {
       for (let path of castle.paths) {
         for (let deployment of path.deployments) {
-          deployment.update()
+          deployment.update(delta)
         }
       }
     }

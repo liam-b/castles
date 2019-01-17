@@ -25,8 +25,20 @@ window.game = new Game()
 
 setInterval(() => { game.tick() }, 1000)
 // setInterval(() => { game.update() }, 17)
-paper.view.onFrame = () => { game.update() }
+// paper.view.onFrame = () => { game.update() }
 
 // window.onbeforeunload = function () {
 //   return "Do you really want to close?";
 // };
+
+var lastTime = window.performance.now()
+function gameLoop() {
+  window.requestAnimationFrame(gameLoop);
+
+  let currentTime = window.performance.now()
+  let delta = (currentTime - lastTime) / 1000 * 60
+  lastTime = currentTime
+  
+  game.update(delta)
+}
+gameLoop()

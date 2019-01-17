@@ -6,34 +6,7 @@ module.exports = class GameServer {
   constructor(http) {
     this.io = socketIO(http)
     this.clients = []
-
-    // this.io.emit('GameInitaliseEvent')
-
-    setInterval(() => {
-      console.log('emit', 'GameInitaliseEvent')
-      
-      this.io.emit('GameInitaliseEvent')
-
-      setTimeout(() => {
-        console.log('emit', 'GameStartEvent')
-  
-        this.reset()
-        for (let client of this.clients) {
-          let player = new Player(client.id, client.hue)
-          this.board.players.push(player)
-          this.board.castles[this.board.players.length - 1].owner = player
-        }
-  
-        this.io.emit('GameStartEvent', this.board.serialise())
-      }, 5000)
-
-    }, 20000)
-
-    // this.io.emit('GameStartEvent', this.board.serialise())
-
-    // this.io.emit('SyncEvent', this.board.serialiseSync())
-
-    // this.io.emit('GameEndEvent')
+    this.board
 
     this.io.on('connection', socket => {
       console.log('new connection', socket.id)
@@ -66,14 +39,63 @@ module.exports = class GameServer {
         }
       })
     })
+
+    setTimeout(() => { this.initaliseGame() }, 4000)
+  }
+
+  initaliseGame() {
+    this.clients = []
+    this.reset()
+
+    console.log('emit', 'GameInitaliseEvent')
+    this.io.emit('GameInitaliseEvent')
+
+    setTimeout(() => { this.startGame() }, 2000)
+  }
+
+  startGame() {
+    for (let client of this.clients) {
+      let player = new Player(client.id, client.hue)
+      this.board.players.push(player)
+      this.board.castles[this.board.players.length - 1].owner = player
+    }
+
+    console.log('emit', 'GameStartEvent')
+    this.io.emit('GameStartEvent', this.board.serialise())
+
+    this.duringGame()
+  }
+
+  duringGame() {
+    // console.log(this.board.castles)
+    
+    let ownerCastleCount = {}
+    
+    for (const castle of this.board.castles) {
+      if (castle.owner) ownerCastleCount[castle.owner.id] = (ownerCastleCount[castle.owner.id] || 0) + 1
+      else ownerCastleCount['null'] = (ownerCastleCount['null'] || 0) + 1
+    }
+
+    console.log('emit', 'SyncEvent')
+    this.io.emit('SyncEvent', this.board.serialiseSync())
+
+    if (Object.keys(ownerCastleCount).length == 1) setTimeout(() => { this.endGame() }, 3000)
+    else setTimeout(() => { this.duringGame() }, 5000)
+  }
+
+  endGame() {
+    console.log('emit', 'GameEndEvent')
+    this.io.emit('GameEndEvent')
+
+    setTimeout(() => { this.initaliseGame() }, 4000)
   }
 
   tick() {
     if (this.board) this.board.tick()
   }
 
-  update() {
-    if (this.board) this.board.update()
+  update(delta) {
+    if (this.board) this.board.update(delta)
   }
 
   reset() {

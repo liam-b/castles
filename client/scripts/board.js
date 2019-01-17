@@ -9,11 +9,11 @@ export default class Board {
     this.players = []
   }
 
-  update() {
+  update(delta) {
     for (let castle of this.castles) {
       for (let path of castle.paths) {
         for (let deployment of path.deployments) {
-          deployment.update()
+          deployment.update(delta)
         }
       }
     }
@@ -44,8 +44,8 @@ export default class Board {
   }
 
   deserialiseSync(sync) {
-    for (let castle in sync.castles) {
-      this.castles[castle.index].deserialise(castle, this.castles, this.players)
+    for (let castle of sync.castles) {
+      this.castles[castle.index].deserialiseSync(castle, this.players)
     }
   }
 

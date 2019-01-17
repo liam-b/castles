@@ -4,7 +4,7 @@ const Deployment = require('./deployment.js')
 
 const CASTLE_SCALE = 1
 const BUTTON_LENGTH = 30
-const DEPLOY_LIMIT = 4
+const DEPLOY_LIMIT = 6
 
 module.exports = class Castle {
   constructor(x, y) {

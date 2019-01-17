@@ -26,6 +26,12 @@ export default class Game {
       console.log('on', 'GameStartEvent')
 
       this.board.deserialise(board, this.client)
+
+      for (const castle of this.board.castles) {
+        console.log(castle.troops);
+        
+      }
+      
     })
     
     this.socket.on('PlayerEvent', event => {
@@ -35,7 +41,15 @@ export default class Game {
     })
     
     this.socket.on('SyncEvent', sync => {
+      console.log('on', 'SyncEvent')
+
       this.board.deserialiseSync(sync)
+    })
+
+    this.socket.on('GameEndEvent', board => {
+      console.log('on', 'GameEndEvent')
+
+      this.board.destroy()
     })
     
     // this.socket.on('disconnect', () => {
@@ -45,7 +59,6 @@ export default class Game {
 
   sendEvent(event) {
     console.log('emit', 'PlayerEvent')
-
     if (this.participating) this.socket.emit('PlayerEvent', event)
   }
 
@@ -53,13 +66,7 @@ export default class Game {
     if (this.board) this.board.tick()
   }
 
-  update() {
-    if (this.board) this.board.update()
+  update(delta) {
+    if (this.board) this.board.update(delta)
   }
 }
-
-// function gameLoop() {
-//   window.requestAnimationFrame(gameLoop);
-
-//   currentTime = (new Date()).getTime();
-//   delta = (currentTime - lastTime) / 1000;
